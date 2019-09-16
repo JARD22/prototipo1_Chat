@@ -1,13 +1,10 @@
 var socket = io();
 
-
 var params = new URLSearchParams(window.location.search);
 
-
-
-if (!params.has('nombre') || !params.has('nombre')) {
+if (!params.has('nombre') || !params.has('sala')) {
     window.location = 'index.html';
-    throw new Error('El nombre  y la sala son necesarios');
+    throw new Error('El nombre y sala son necesarios');
 }
 
 var usuario = {
@@ -16,12 +13,15 @@ var usuario = {
 };
 
 
+
 socket.on('connect', function() {
     console.log('Conectado al servidor');
-    //El servidor sabe quien se ha conectado                                             
+
     socket.emit('entrarChat', usuario, function(resp) {
-        console.log('Usuarios conecatados', resp);
+        renderizarUsuarios(resp)
+        console.log('Usuarios conectados', resp);
     });
+
 });
 
 // escuchar
@@ -31,31 +31,26 @@ socket.on('disconnect', function() {
 
 });
 
+//Enviar Informacion
 
-// // Enviar información
-// socket.emit('enviarMensaje', {
-//     usuario: 'Fernando',
-//     mensaje: 'Hola Mundo'
-// }, function(resp) {
-//     console.log('respuesta server: ', resp);
-// });
 
-// Escuchamos el mensaje del usuario que abandono la sala
+// Escuchar información
 socket.on('crearMensaje', function(mensaje) {
-
-    console.log('Servidor:', mensaje);
-
+    renderizarMensajes(mensaje, false);
+    scrollBottom();
+    // console.log('Servidor:', mensaje);
 });
 
-//Escuchar cuando un usuario entra o sale de la sala de chat
-socket.on('listaPersonas', function(personas) {
+// Escuchar cambios de usuarios
+// cuando un usuario entra o sale del chat
+socket.on('listaPersona', function(personas) {
     console.log(personas);
-})
+    renderizarUsuarios(personas)
+});
 
-
-
-//Mensajes privados
-
+// Mensajes privados
 socket.on('mensajePrivado', function(mensaje) {
-    console.log('Mensaje Privado: ', mensaje);
-})
+
+    console.log('Mensaje Privado:', mensaje);
+
+});
